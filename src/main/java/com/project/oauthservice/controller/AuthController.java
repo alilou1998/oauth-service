@@ -2,6 +2,7 @@ package com.project.oauthservice.controller;
 
 import com.project.oauthservice.dto.LoginRequest;
 import com.project.oauthservice.dto.LoginResponse;
+import com.project.oauthservice.dto.LogoutResponse;
 import com.project.oauthservice.model.User;
 import com.project.oauthservice.service.UserService;
 import com.project.oauthservice.util.SecurityCipher;
@@ -14,6 +15,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 @RestController
@@ -47,6 +50,11 @@ public class AuthController {
         String decryptedAccessToken = SecurityCipher.decrypt(accessToken);
         String decryotedRefreshToken = SecurityCipher.decrypt(refreshToken);
         return userService.refresh(decryptedAccessToken,decryotedRefreshToken);
+    }
+
+    @PostMapping(value = "/logout")
+    public ResponseEntity<LogoutResponse> logout(HttpServletResponse response, HttpServletRequest request){
+        return userService.logout(request,response);
     }
 
 

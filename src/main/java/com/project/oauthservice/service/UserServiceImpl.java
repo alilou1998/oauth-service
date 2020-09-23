@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -67,9 +68,29 @@ public class UserServiceImpl implements UserService {
             addRefreshTokenCookie(responseHeaders,newRefreshToken);
         }
 
-
+        responseHeaders.add(HttpHeaders.SET_COOKIE,"logged_in=true;Path=/");
         LoginResponse loginResponse = new LoginResponse(LoginResponse.SuccessFailure.SUCCESS,"Authentication successful, Tokens in Cookies");
         return ResponseEntity.ok().headers(responseHeaders).body(loginResponse);
+    }
+
+    @Override
+    public ResponseEntity<LogoutResponse> logout(HttpServletRequest request, HttpServletResponse response) {
+        HttpSession session = request.getSession(false);
+        SecurityContextHolder.clearContext();
+        session = request.getSession(false);
+        if(session!=null){
+            session.invalidate();
+        }
+        if(request.getCookies()!=null){
+            for(Cookie cookie:request.getCookies()){
+                cookie.setMaxAge(0);
+                cookie.setValue("");
+                cookie.setHttpOnly(true);
+                cookie.setPath("/");
+                response.addCookie(cookie);
+            }
+        }
+        return ResponseEntity.ok().body(new LogoutResponse("True","The user has been logged out"));
     }
 
     @Override
