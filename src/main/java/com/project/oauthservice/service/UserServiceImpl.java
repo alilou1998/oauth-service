@@ -82,6 +82,7 @@ public class UserServiceImpl implements UserService {
             session.invalidate();
         }
         if(request.getCookies()!=null){
+            System.out.println("Cookies found");
             for(Cookie cookie:request.getCookies()){
                 cookie.setMaxAge(0);
                 cookie.setValue("");

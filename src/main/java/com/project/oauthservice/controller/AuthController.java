@@ -52,7 +52,7 @@ public class AuthController {
         return userService.refresh(decryptedAccessToken,decryotedRefreshToken);
     }
 
-    @PostMapping(value = "/logout")
+    @GetMapping(value = "/logout")
     public ResponseEntity<LogoutResponse> logout(HttpServletResponse response, HttpServletRequest request){
         return userService.logout(request,response);
     }
