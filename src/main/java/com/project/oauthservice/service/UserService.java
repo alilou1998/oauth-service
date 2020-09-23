@@ -1,9 +1,6 @@
 package com.project.oauthservice.service;
 
-import com.project.oauthservice.dto.LoginRequest;
-import com.project.oauthservice.dto.LoginResponse;
-import com.project.oauthservice.dto.LogoutResponse;
-import com.project.oauthservice.dto.UserSummary;
+import com.project.oauthservice.dto.*;
 import com.project.oauthservice.model.User;
 import org.springframework.http.ResponseEntity;
 
@@ -19,6 +16,8 @@ public interface UserService {
     ResponseEntity<LoginResponse> refresh(String accessToken,String refreshToken);
 
     UserSummary getUserProfile();
+
+    ResponseEntity<UserDetails> getUserDetails(long id);
 
     boolean isFound(String email);
 

@@ -117,6 +117,17 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public ResponseEntity<UserDetails> getUserDetails(long id) {
+        User user = userRepository.findById(id).orElseThrow(()-> new IllegalArgumentException("User not found"));
+        UserDetails userDetails = new UserDetails(
+                id,user.getUsername(),user.getEmail(),
+                user.getFirstname(),user.getLastname()
+                ,user.getBirth(),user.getSex(),
+                user.getCountry(),user.isEnabled());
+        return ResponseEntity.ok().body(userDetails);
+    }
+
+    @Override
     public boolean isFound(String email) {
         return userRepository.findByEmail(email).isPresent();
     }
