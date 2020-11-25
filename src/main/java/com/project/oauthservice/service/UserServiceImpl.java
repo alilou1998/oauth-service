@@ -45,7 +45,7 @@ public class UserServiceImpl implements UserService {
     public ResponseEntity<LoginResponse> login( LoginRequest loginRequest, String accessToken, String refreshToken) {
         String email = loginRequest.getEmail();
         User user = userRepository.findByEmail(email).orElseThrow(()->new IllegalArgumentException("User not found with email "+ email));
-
+        logger.info("Login -> Validate the tokens");
         Boolean accessTokenValid = tokenProvider.validateToken(accessToken);
         Boolean refreshTokenValid = tokenProvider.validateToken(refreshToken);
 
@@ -70,6 +70,7 @@ public class UserServiceImpl implements UserService {
 
         responseHeaders.add(HttpHeaders.SET_COOKIE,"logged_in=true;Path=/");
         LoginResponse loginResponse = new LoginResponse(LoginResponse.SuccessFailure.SUCCESS,"Authentication successful, Tokens in Cookies");
+        logger.info("Succesful Login");
         return ResponseEntity.ok().headers(responseHeaders).body(loginResponse);
     }
 
@@ -87,6 +88,7 @@ public class UserServiceImpl implements UserService {
                 cookie.setMaxAge(0);
                 cookie.setValue("");
                 cookie.setHttpOnly(true);
+                cookie.setSecure(true);
                 cookie.setPath("/");
                 response.addCookie(cookie);
             }
@@ -96,11 +98,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ResponseEntity<LoginResponse> refresh(String accessToken, String refreshToken) {
+        logger.info("Refresh -> Validate the refresh Token");
+        logger.info("AccessToken : "+tokenProvider.validateToken(accessToken));
         boolean refreshTokenValid = tokenProvider.validateToken(refreshToken);
         if(!refreshTokenValid){
             throw new IllegalArgumentException("Refresh Token is invalid");
         }
-        String currentUserEmail = tokenProvider.getUsernameFromToken(accessToken);
+        String currentUserEmail = tokenProvider.getUsernameFromToken(refreshToken);
+        logger.info("Current user : "+currentUserEmail);
         Token newAccessToken = tokenProvider.generateAccessToken(currentUserEmail);
         HttpHeaders responseHeaders = new HttpHeaders();
         responseHeaders.add(HttpHeaders.SET_COOKIE,cookieUtil.createAccessTokenCookie(newAccessToken.getTokenValue(),newAccessToken.getDuration()).toString());
@@ -118,13 +123,18 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ResponseEntity<UserDetails> getUserDetails(long id) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUserDetails customeUserDetails = (CustomUserDetails) authentication.getPrincipal();
         User user = userRepository.findById(id).orElseThrow(()-> new IllegalArgumentException("User not found"));
-        UserDetails userDetails = new UserDetails(
-                id,user.getUsername(),user.getEmail(),
-                user.getFirstname(),user.getLastname()
-                ,user.getBirth(),user.getSex(),
-                user.getCountry(),user.isEnabled());
-        return ResponseEntity.ok().body(userDetails);
+        if(customeUserDetails.getUsername().equals(user.getEmail())){
+            UserDetails userDetails = new UserDetails(
+                    id,user.getUsername(),user.getEmail(),
+                    user.getFirstname(),user.getLastname()
+                    ,user.getBirth(),user.getSex(),
+                    user.getCountry(),user.isEnabled());
+            return ResponseEntity.ok().body(userDetails);
+        }
+        return ResponseEntity.noContent().build();
     }
 
     @Override

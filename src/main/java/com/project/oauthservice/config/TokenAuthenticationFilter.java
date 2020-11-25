@@ -64,12 +64,14 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
     private String getJwtFromCookie(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
-        for (Cookie cookie : cookies) {
-            if (accessTokenCookieName.equals(cookie.getName())) {
-                String accessToken = cookie.getValue();
-                if (accessToken == null) return null;
+        if(cookies!=null){
+            for (Cookie cookie : cookies) {
+                if (accessTokenCookieName.equals(cookie.getName())) {
+                    String accessToken = cookie.getValue();
+                    if (accessToken == null) return null;
 
-                return SecurityCipher.decrypt(accessToken);
+                    return SecurityCipher.decrypt(accessToken);
+                }
             }
         }
         return null;

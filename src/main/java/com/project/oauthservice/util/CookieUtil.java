@@ -18,6 +18,7 @@ public class CookieUtil {
         return ResponseCookie.from(accessTokenCookieName, encryptedToken)
                 .maxAge(duration)
                 .httpOnly(true)
+                .secure(true)
                 .path("/")
                 .build();
     }
@@ -27,6 +28,7 @@ public class CookieUtil {
         return ResponseCookie.from(refreshTokenCookieName, encryptedToken)
                 .maxAge(duration)
                 .httpOnly(true)
+                .secure(true)
                 .path("/")
                 .build();
     }

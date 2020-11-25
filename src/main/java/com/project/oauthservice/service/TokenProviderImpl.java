@@ -69,9 +69,10 @@ public class TokenProviderImpl implements TokenProvider {
     public Boolean validateToken(String token) {
         try {
             Jwts.parser().setSigningKey(tokenSecret).parse(token);
+            logger.info("Token refreshed");
             return true;
         } catch (SignatureException | MalformedJwtException | ExpiredJwtException | UnsupportedJwtException | IllegalArgumentException ex) {
-            logger.info(this.getClass()+"Token not valid");
+            logger.info(this.getClass()+" Token not valid");
         }
         return false;
     }
